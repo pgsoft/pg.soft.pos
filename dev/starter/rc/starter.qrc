@@ -1,0 +1,8 @@
+﻿<RCC>
+  <qresource prefix="splash" >
+    <file>images/splash.png</file>
+  </qresource>
+  <qresource prefix="mainIcon" >
+    <file>images/mainWindow.png</file>
+  </qresource>
+</RCC>
