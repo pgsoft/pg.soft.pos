@@ -1,68 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="he_IL">
+<TS version="2.1" language="ru_RU">
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../src/main.cpp" line="19"/>
-        <source>Pancaches Group Ltd</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/main.cpp" line="41"/>
-        <location filename="../src/main.cpp" line="49"/>
+        <location filename="../src/main.cpp" line="43"/>
         <source>Error!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="42"/>
-        <source>The system was unable to run a startup plugin!!!
-Notify your administrator about this error!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/main.cpp" line="50"/>
-        <source>The system could not to find any startup plug-in !!!!
+        <location filename="../src/main.cpp" line="44"/>
+        <source>%1
 Notify your administrator about this error!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/mainobject.cpp" line="59"/>
+        <source>Pancaches Group Ltd</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/mainobject.cpp" line="74"/>
         <source>Чтение параметров...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainobject.cpp" line="63"/>
-        <source>Получение данных с удаленного сервера...</source>
+        <location filename="../src/mainobject.cpp" line="79"/>
+        <source>Локализация строк...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainobject.cpp" line="67"/>
+        <location filename="../src/mainobject.cpp" line="89"/>
         <source>Обновление компонентов ПО...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainobject.cpp" line="71"/>
+        <location filename="../src/mainobject.cpp" line="93"/>
         <source>Загрузка компонентов ПО...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainobject.cpp" line="102"/>
+        <location filename="../src/mainobject.cpp" line="126"/>
         <source>версия</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainobject.cpp" line="170"/>
+        <location filename="../src/mainobject.cpp" line="195"/>
         <source>Загрузка компоненты</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainobject.cpp" line="189"/>
+        <location filename="../src/mainobject.cpp" line="214"/>
         <source>Критическая ошибка!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainobject.cpp" line="190"/>
+        <location filename="../src/mainobject.cpp" line="215"/>
         <source>Система не смогла найти модуль ядра!!!
 Сообщите администратору об ошибке!</source>
         <translation type="unfinished"></translation>

@@ -27,9 +27,11 @@ TRANSLATIONS    = ts/$${TARGET}_ru.ts \
                   ts/$${TARGET}_en.ts \
                   ts/$${TARGET}_he.ts
 CODECFORSRC     = UTF-8
-HEADERS = $${PROJECT_DEV}/Commone/enums.h \
-    src/mainobject.h
+HEADERS = ../Commone/enums.h \
+    src/mainobject.h \
+    ../commone/commonefunctions.h
 SOURCES = src/main.cpp \ 
-    src/mainobject.cpp
+    src/mainobject.cpp \
+    ../commone/commonefunctions.cpp
 RESOURCES += rc/$${TARGET}.qrc
 RC_FILE += rc/$${TARGET}.rc

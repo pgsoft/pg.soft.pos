@@ -1,7 +1,11 @@
 #include "mainobject.h"
+#include <QApplication>
 #include <QLabel>
 #include <QMessageBox>
 #include <QTranslator>
+#include <QTextCodec>
+#include <QStyleFactory>
+#include "commonefunctions.h"
 
 MainObject::MainObject(QObject *parent) :
     QObject(parent)
@@ -42,35 +46,64 @@ bool MainObject::isOk(){
 
     return mainObjectState;
 }
+void MainObject::showSplashMessage(const QString &pText){
+    if(onloadApiSplashScreen){
+        onloadApiSplashScreen->showMessage(pText,Qt::AlignLeft,Qt::white);
+        qApp->processEvents();
+    }
+}
 
 bool MainObject::initModelView(){
     bool rv = false; //значение возврата из функции, пу = false
-    pixmap = new QPixmap(":/splash/splash.png");
     //цикл действий
     while (true){
+        //локализация - настройка отображения русского текста
+        QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
+        //параметры приложения
+        qobject_cast<QApplication *>(qApp)->setStyle(QStyleFactory::create("plastique")); //стиль графических элементов
+        qApp->setApplicationVersion(QObject::tr("1.0"));
+        qApp->setOrganizationDomain(QObject::tr("Pancaches.Group"));
+        qApp->setOrganizationName(QObject::tr("Pancaches Group Ltd"));
+        qApp->setApplicationName(QObject::tr("POS"));
+
         //create splash widget
-        onloadApiSplashScreen = new QSplashScreen(NULL
-                                                  , pixmap->scaled(QSize(splashScreenWidth, splashScreenHeight)
-                                                          , Qt::KeepAspectRatio
-                                                          , Qt::SmoothTransformation));
+        pixmap = new QPixmap(":/splash/images/splash.png");
+        if (pixmap){
+
+            onloadApiSplashScreen = new QSplashScreen(pixmap->scaled(QSize(splashScreenWidth, splashScreenHeight)));
+
+            //ручное добавление в заставку нескольких авторских виджетов
+            int verOff=20;
+            //версия ПО
+            QLabel *verLabel = new QLabel(QObject::tr("версия")+" "+qApp->QCoreApplication::applicationVersion()
+                                          , onloadApiSplashScreen);
+            verLabel->move(verOff, splashScreenHeight-60);
+            verLabel->show();
+            //владелец ПО
+            QLabel *ownerLabel = new QLabel(qApp->QCoreApplication::organizationName()+ QObject::tr(" (c) All rights reserved")
+                                            , onloadApiSplashScreen);
+            ownerLabel->move(verOff,splashScreenHeight-30);
+            ownerLabel->show();
+
+        }
         if (!onloadApiSplashScreen) break; //нет виджета заставки - прервать цикл действий
         onloadApiSplashScreen->show();
-        qApp->processEvents();
+        showSplashMessage();
         //
-        onloadApiSplashScreen->showMessage(QObject::tr("Чтение параметров..."));
-        qApp->processEvents();
         if (!readParameters()) break; //ошибка - прервать цикл действий
         //
-        onloadApiSplashScreen->showMessage(QObject::tr("Получение данных с удаленного сервера..."));
-        qApp->processEvents();
-        if (!downloadComponents()) break; //ошибка - прервать цикл действий
+        QTranslator *translator = new QTranslator(this);
+        if (translator){
+            translator->load(qApp->applicationName()+"_"+apiSettings->value("App/Locale").toString());
+            qApp->installTranslator(translator);
+        }else{
+            break;
+        } //ошибка - прервать цикл действий
         //
-        onloadApiSplashScreen->showMessage(QObject::tr("Обновление компонентов ПО..."));
-        qApp->processEvents();
+        showSplashMessage(QObject::tr("Обновление компонентов ПО..."));
         if (!updateComponents()) break; //ошибка - прервать цикл действий
         //
-        onloadApiSplashScreen->showMessage(QObject::tr("Загрузка компонентов ПО..."));
-        qApp->processEvents();
+        showSplashMessage(QObject::tr("Загрузка компонентов ПО..."));
         if (!loadPlugins()) break; //ошибка - прервать цикл действий
         //
         //ошибок нет - все ок
@@ -99,48 +132,8 @@ bool MainObject::readParameters(){
         if (!apiSettings->contains(key)) apiSettings->setValue(key,QVariant("en"));
         //синхронизация изменений параметров с файлом параметров
         apiSettings->sync();
-
-        //
-        QTranslator *translator = new QTranslator(this);
-        translator->load(qApp->applicationName()+"_"+apiSettings->value("App/Locale").toString());
-        qApp->installTranslator(translator);
-
-
-        //ручное добавление в заставку нескольких авторских виджетов
-        //версия ПО
-        QLabel *verLabel = new QLabel(QObject::tr("версия")+" "+qApp->QCoreApplication::applicationVersion(), onloadApiSplashScreen);
-        int verOff=20;
-        verLabel->move(verOff, (int) (splashScreenHeight*2/3));
-        verLabel->resize(splashScreenWidth - verOff*2, verLabel->fontMetrics().height()+4);
-        //владелец ПО
-        QString ownerText = QString("(c) %1").arg(qApp->QCoreApplication::organizationName());
-        QLabel *ownerLabel = new QLabel(ownerText, onloadApiSplashScreen);
-        QFont lfont = ownerLabel->font();
-        lfont.setBold(true);
-        lfont.setPointSize(14);
-        ownerLabel->setFont(lfont);
-        ownerLabel->move(1,30);
-        ownerLabel->resize(splashScreenWidth-2, 30);
-        ownerLabel->setAlignment(Qt::AlignHCenter);
-        ownerLabel->show();
         rv = true;
     }
-    return rv;
-}
-
-bool MainObject::downloadComponents(){
-    bool rv = true; //значение возврата из функции, пу = true
-    //пока заглушка
-    return rv;
-}
-
-bool MainObject::uploadData(){
-    bool rv = true; //значение возврата из функции, пу = true
-    //пока заглушка
-    /*ayk todo: создание отдельного объекта класса, который
-     * в параллельном потоке с определенной цикличностью,
-     * возможно заданной в параметрах приложения выполняет отправку
-     * в определенном формате накопленных данных */
     return rv;
 }
 
@@ -148,7 +141,7 @@ bool MainObject::uploadData(){
 void MainObject::closeAllPlugins(){
     //close all plugins and clear plugins list
     for (int i=0; i<pluList.size(); ++i){
-        delete pluList[i];
+        if (pluList[i]) delete pluList[i];
         pluList[i]=NULL;
     }
     pluList.clear();
@@ -164,41 +157,55 @@ bool MainObject::updateComponents(){
     return rv;
 }
 
-bool MainObject::loadPlugins(){
-    bool rv = true; //значение возврата из функции, пу = true
-    QDir pluDir = QDir(qApp->applicationDirPath());
-    pluDir.cd("plugins");
-    foreach (QFileInfo pluInfo, pluDir.entryInfoList(QDir::Files))
-    {
-        //QMessageBox::information(0,"",pluInfo.absoluteFilePath());
-        QPluginLoader loader(pluInfo.absoluteFilePath(), qApp);
-        if (QObject *plugin = loader.instance())
+bool MainObject::loadPlugins(bool pShowError){
+    qApp->setProperty("loadPluginsMessage",QVariant());
+    QString pluPath = "plugins";
+    QString textError;
+    bool rv = checkAppPath(pluPath);
+    if (!rv){
+        textError = qApp->property("checkAppPathMessage").toString();
+    }else{
+        closeAllPlugins();
+        QDir pluDir = QDir(qApp->applicationDirPath());
+        pluDir.cd(pluPath);
+        foreach (QFileInfo pluInfo, pluDir.entryInfoList(QDir::Files))
         {
-            if (AnyPluginInterface *plu = qobject_cast<AnyPluginInterface *>(plugin))
+            //QMessageBox::information(0,"",pluInfo.absoluteFilePath());
+            QPluginLoader loader(pluInfo.absoluteFilePath(), qApp);
+            if (QObject *plugin = loader.instance())
             {
-                onloadApiSplashScreen->showMessage(QString("%1 <%2>...").arg(QObject::tr("Загрузка компоненты")).arg(plu->getPluName()));
-                qApp->processEvents();
-                plu->setPluLoadPath(pluInfo.absolutePath(),pluInfo.baseName());
-                pluList.append(plugin);
+                if (AnyPluginInterface *plu = qobject_cast<AnyPluginInterface *>(plugin))
+                {
+                    showSplashMessage(QString("%1 <%2>...")
+                                      .arg(QObject::tr("Загрузка компоненты"))
+                                      .arg(plu->getPluName()));
+                    plu->setPluLoadPath(pluInfo.absolutePath(),pluInfo.baseName());
+                    pluList.append(plugin);
+                }
+                if (!currentPluCore)
+                    currentPluCore = qobject_cast<PluCoreInterface *>(plugin);
             }
-            if (!currentPluCore)
-                currentPluCore = qobject_cast<PluCoreInterface *>(plugin);
+        }
+        for (int i=0; i<pluList.size(); ++i){
+            if (AnyPluginInterface *plu = qobject_cast<AnyPluginInterface *>(pluList.at(i)))
+            {
+                plu->setPluList(&pluList);
+                plu->setAppParameters(apiSettings);
+            }
+        }
+        //изменим значение возврата и,если не обнаружен плагин ядра, то и выведем сообщение
+        if (!(rv = currentPluCore)){
+            textError=QObject::tr("Система не смогла найти модуль ядра!");
         }
     }
-    for (int i=0; i<pluList.size(); ++i){
-        if (AnyPluginInterface *plu = qobject_cast<AnyPluginInterface *>(pluList.at(i)))
-        {
-            plu->setPluList(&pluList);
-            plu->setAppParameters(apiSettings);
+    if (!textError.isEmpty()){
+        if  (pShowError){
+            QMessageBox::critical(NULL,
+                                  QObject::tr("Ошибка!"),
+                                  textError+QObject::tr("\nСообщите администратору об ошибке!"),
+                                  QMessageBox::Ok,0,0);
         }
-    }
-    //изменим значение возврата и,если не обнаружен плагин ядра, то и выведем сообщение
-    if (!(rv = currentPluCore)){
-        QMessageBox::critical(onloadApiSplashScreen,
-                              QObject::tr("Критическая ошибка!"),
-                              QObject::tr("Система не смогла найти модуль ядра!!!\n"
-                                          "Сообщите администратору об ошибке!"),
-                              QMessageBox::Ok,0,0);
+        qApp->setProperty("loadPluginsMessage",QVariant(textError));
     }
     return rv;
 }

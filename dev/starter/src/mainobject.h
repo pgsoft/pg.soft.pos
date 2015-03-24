@@ -36,12 +36,11 @@ private:
 
     //functions members
     bool readParameters();
-    bool downloadComponents(); //функция, выполняющая скачивание компонетов ПО с удаленного сервера
-    bool uploadData(); //функция, выполняющая загрузку данных на удаленный сервер
     bool updateComponents(); //функция, выполняющая обновление компонентов ПО
-    bool loadPlugins(); //поиска и загрузка плагинов
+    bool loadPlugins(bool pShowError=true); //поиска и загрузка плагинов
     bool initModelView(); //инициализация объекта
     void closeAllPlugins();
+    void showSplashMessage(const QString &pText=QString());
 public:
     bool isOk(); //получить общее состояние объекта true=все ок, false = есть проблемы
     bool selectStartupPlugin(); //выбор стартап плагина
