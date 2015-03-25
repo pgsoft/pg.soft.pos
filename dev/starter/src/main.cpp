@@ -15,10 +15,11 @@ int main(int argc, char ** argv)
         //если объект готов к работе
         if (mainObject->isOk())
         {
+            /**/
+            //mainObject->hideSplash();
+            //
             if (mainObject->selectStartupPlugin()){
                 if (mainObject->launchStartupPlugin()){
-                    /**/
-                    mainObject->hideSplash();
                     /*связываем событие закрытия последнего окна со слотом завершения
                     * цикла основного обработчика событий приложения
                     */
@@ -26,23 +27,23 @@ int main(int argc, char ** argv)
                     //запуск цикла основного обработчика событий приложения
                     appReturnValue = app.exec();
                 }else{
-                    textError = QObject::tr("Система не смогла запустить пользовательский модуль!");
+                    textError = QObject::tr("Can not start user module!");
                 }
             }else{
-                textError = QObject::tr("Система не нашла пользовательский модуль!");
+                textError = QObject::tr("Can not find user module!");
             }
         }else{
-            textError = QObject::tr("Не инициализирован главный объект!");
+            textError = QObject::tr("Can not to initialize the main object!");
         }
     }else{
-        textError = QObject::tr("Не создан главный объект!");
+        textError = QObject::tr("Main object not created!");
     }
     //
     if (!textError.isEmpty()){
         QMessageBox::critical(0,
-                              QObject::tr("Ошибка!"),
-                              QObject::tr("%1\n"
-                                          "Сообщите вашему администратору!").arg(textError),
+                              QObject::tr("Error!"),
+                              textError+"\n"
+                                        "Notify your administrator!",
                               QMessageBox::Ok,0,0);
     }
     if (mainObject){

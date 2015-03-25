@@ -1,96 +1,81 @@
 #include "plu.h"
 #include <QMessageBox>
+#include "commonefunctions.h"
 
 Plu::Plu()
 {
-    pluLoadPath = ""; //путь, где обнаружен плагин
-    appParameters=NULL; //параметры приложения
     pluParameters=NULL; // параметры плагина
-    pluList=NULL; //список всех обнаруженных плагинов
-    pluFileName = "core";
+    pluUID = "core";
+    setProperty("core", pluUID);
+    if (!addAppTranslator(getUID())){
+        QMessageBox::warning(NULL,
+                             QObject::tr("Error!"),
+                             qApp->property("addAppTranslatorMessage").toString(),
+                             QMessageBox::Ok,0,0);
+        //break; //ошибка - прервать цикл действий
+    }
 }
 
 Plu::~Plu(){
 
 }
 
-int Plu::getPluType() //получить тип плагина
-{
-    return (int) PLU_CORE;
+QString Plu::getUID() const {
+    return pluUID;
 }
 
-int Plu::getPluSortPosition(){
-    return 0;
+QString Plu::getFileName() const {
+    return property("pluFileName").toString();
+}
+QString Plu::getName() const {
+    return property("pluName").toString();
 }
 
-QString Plu::getPluUID() const {
-    return pluFileName;
+QString Plu::getDescription() const {
+    return tr("The Core module.");
 }
 
-QString Plu::getPluName() const {
-    return pluFileName;
-}
-
-QString Plu::getPluDescription() const {
-    return tr("Внешний плагин функций Ядра.");
-}
-
-QWidget * Plu::getPluWidget(){
+QWidget * Plu::getWidget(){
     return NULL;
 }
 
-QString Plu::getPluLoadPath() const {
-    return pluLoadPath;
-}
-
-QSettings * Plu::getPluParameters(){
+QSettings * Plu::getParameters(){
     return pluParameters;
 }
-QSettings *Plu::getAppParameters(){
-    return appParameters;
-}
 //установить путь и краткое название для плагина
-void Plu::setPluLoadPath(const QString &pPath, const QString &pPluName){
-    pluLoadPath = pPath;
-    pluFileName = pPluName;
-    pluParameters = new QSettings(getPluLoadPath()+"/"+getPluName()+".ini",QSettings::IniFormat,this);
+void Plu::setFileName(const QString &pFileName){
+    QString pluLoadPath = qApp->property("pluPath").toString();
+    setProperty("pluFileName", pFileName.trimmed());
+    pluParameters = new QSettings(pluLoadPath+"/"+getFileName()+".ini",QSettings::IniFormat,this);
     if (pluParameters)
     {
         //
         pluParameters->sync();
         //далее представлен шаблон добавление в ини-файл параметра
-        //QString key;
-        //QVariant defaultValue;
+        QString key;
+        QVariant defaultValue;
 
-        //key = "<введите название группы (если необходимо)>/<введите название ключа параметра>";
-        //defaultValue =QVariant(<введите значение по-умолчанию нужного типа, совместимого с QVariant>);
-        //if (!pluParameters->contains(key)) pluParameters->setValue(key,defaultValue);
+        key = "pluName";
+        defaultValue =QVariant(getFileName());
+        if (!pluParameters->contains(key)) pluParameters->setValue(key,defaultValue);
         pluParameters->sync();
+        setProperty("pluName", pluParameters->value(key));
+        //
     }
     else
     {
         QMessageBox::warning(0
-                             ,tr("Внимание!!!")
-                             ,tr("Ошибка получения параметров плагина <%1>!")
-                             .arg(getPluName()));
+                             ,tr("Attantion!!!")
+                             ,tr("Can not receive parameters of module:\n")+getFileName());
     }
 }
 
-//установить ссылку на параметры приложения
-void Plu::setAppParameters(QSettings *pSettings){
-    appParameters = pSettings;
-}
-
-//установить список всех обнаруженных плагинов
-void Plu::setPluList(QList<QObject *> *pList){
-    pluList = pList;
-}
 //выполнить целевое действие плагина
-QVariant Plu::performPluAction(const QVariant &parameter){
+QVariant Plu::launchAction(const QVariant &parameter){
     QVariant rv;
     //
     if (parameter.isValid()){
-
+        //to do something
     }
     //to do something
     //
@@ -130,7 +115,7 @@ int Plu::insertData(const QString &pTableName
             if (!(pRecord.value(i).isValid())) continue;
             query.bindValue(QString(":p%1").arg(pRecord.fieldName(i)), pRecord.value(i));
         }
-        if (execSQL(&query,0,tr("Добавление записи в таблицу: %1").arg(pTableName)))
+        if (execSQL(&query,0,tr("Insert record to table: ")+pTableName))
         {
             query.prepare(QString("SELECT max(rowid) FROM \"%1\"").arg(pTableName));
             if (execSQL(&query) && query.next())
@@ -140,8 +125,8 @@ int Plu::insertData(const QString &pTableName
             else
             {
                 QMessageBox::warning(NULL,
-                                     tr("Ошибка!!!"),
-                                     tr("Нет ответа при добавлении записи в таблицу: ")+pTableName);
+                                     tr("Error!!!"),
+                                     tr("No answer due inserting record to the table: ")+pTableName);
             }
         }
     }
@@ -184,7 +169,7 @@ int Plu::updateData(const QString &pTableName
             }
             query.bindValue(QString(":p%1").arg(pRecord.fieldName(i)), pRecord.value(i));
         }
-        if (execSQL(&query,0,tr("Обновление записи в таблице: %1").arg(pTableName)))
+        if (execSQL(&query,0,tr("Updating of record in the table: ")+pTableName))
         {
             lRV = recordIDValue.toInt();
         }
@@ -206,7 +191,7 @@ bool Plu::deleteData(const QString &pTableName
                       .arg(pTableName)
                       .arg(pIDFieldName));
         query.bindValue(":pIDFieldValue", pRecord.value(pIDFieldName));
-        lRV = execSQL(&query,0,tr("Удаление записи в таблице: %1").arg(pTableName));
+        lRV = execSQL(&query,0,tr("Deleting record in the table: ")+pTableName);
     }
     return lRV;
 
@@ -218,7 +203,7 @@ QSqlRecord Plu::getStructureOfTable(const QString &pTableName, QSqlDatabase *pDB
     QSqlRecord rV;
     QSqlQuery query(*pDB);
     query.prepare(QString("select * from \"%1\" limit 1").arg(pTableName));
-    if (execSQL(&query,0,tr("Получение структуры таблицы: %1").arg(pTableName)))
+    if (execSQL(&query,0,tr("Getting structure of the table: ")+pTableName))
     {
         rV = query.record();
     }
@@ -233,8 +218,10 @@ bool Plu::execSQL(QSqlQuery *pQuery, QWidget *parentWidget, const QString & abou
             rv = true;
         }else{
             QMessageBox::warning(parentWidget
-                                 ,tr("Внимание!")
-                                 ,tr("Ошибка при выполнении SQL запроса\n"
+                                 ,tr("Attantion!")
+                                 ,tr("Error executing SQL")
+                                 +QString(
+                                     "\n"
                                      "%1\n\n"
                                      "%2\n\n"
                                      "%3")
@@ -243,10 +230,11 @@ bool Plu::execSQL(QSqlQuery *pQuery, QWidget *parentWidget, const QString & abou
         }
     }else{
         QMessageBox::warning(parentWidget
-                             ,tr("Внимание!")
-                             ,tr("Ошибка при выполнении SQL запроса\n"
-                                 "%1\n\nПустой запрос!").arg(aboutQuery)
-                             );
+                             ,tr("Attantion!")
+                             ,tr("Error executing SQL")
+                             +"\n"+aboutQuery+"\n\n"
+                             +tr("Empty query!")
+                );
     }
     return rv;
 }

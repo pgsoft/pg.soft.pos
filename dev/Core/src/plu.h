@@ -10,7 +10,8 @@
 class Plu : public QObject, public PluCoreInterface, public AnyPluginInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "AZ_Soft.Plugins.AnyPluginInterface/3.0")
+    Q_PLUGIN_METADATA(IID "PG.Soft.Plugins.AnyPluginInterface/1.0")
+    Q_PLUGIN_METADATA(IID "PG.Soft.Plugins.PluCoreInterface/1.0")
     Q_INTERFACES(AnyPluginInterface PluCoreInterface)
 
 public:
@@ -18,23 +19,16 @@ public:
     virtual ~Plu();
 
 public: //AnyPlugin interface
-    int getPluType(); //получить тип плагина
-    int getPluSortPosition(); //получить позицию для сортировки в списке плагинов
-    QString getPluUID() const; //получить уникальный айди плагина
-    QString getPluName() const; //получить краткое название плагина
-    QString getPluDescription() const; //получить подробное описание плагина
-    QWidget * getPluWidget(); //получить графическое представление плагина
-    QString getPluLoadPath() const; //получить путь, где обнаружен плагин
-    QSettings *getPluParameters(); //получить ссылку на параметры плагина
-    QSettings *getAppParameters(); //получить ссылку на параметры приложения
+    QString getUID() const; //получить уникальный айди плагина
+    QString getFileName() const; //получить имя файла плагина без расширения
+    QString getName() const; //получить краткое название плагина
+    QString getDescription() const; //получить подробное описание плагина
+    QWidget *getWidget(); //получить графическое представление плагина
+    QSettings *getParameters(); //получить ссылку на параметры плагина
     //установить путь и краткое название для плагина
-    void setPluLoadPath(const QString &pPath, const QString &pPluName = QString());
-    //установить ссылку на параметры приложения
-    void setAppParameters(QSettings *pSettings);
-    //установить список всех обнаруженных плагинов
-    void setPluList(QList<QObject *> *pList);
+    void setFileName(const QString &pFileName = QString());
     //выполнить целевое действие плагина
-    QVariant performPluAction(const QVariant &parameter=QVariant());
+    QVariant launchAction(const QVariant &parameter=QVariant());
 
 public: //PluCore interface
     //вставить запись в таблицу БД

@@ -3,6 +3,7 @@
 
 #include <QtCore>
 #include <QtGui>
+
 class PluStartupInterface
 {
 public:
@@ -10,9 +11,10 @@ public:
 protected:
     int pluState;
 public:
-    virtual int getPluState() = 0;
-    virtual void slotPluStart() = 0;
-    virtual void slotPluStop() = 0;
+    virtual int getSortPosition() = 0; //получить позицию для сортировки в списке плагинов
+    virtual int getState() = 0;
+    virtual void slotStart() = 0;
+    virtual void slotStop() = 0;
 };
 
 Q_DECLARE_INTERFACE(PluStartupInterface, "AZ_Soft.Plugins.PluStartupInterface/3.0")

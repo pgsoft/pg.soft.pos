@@ -23,11 +23,13 @@ INCLUDEPATH += ./src \
     $${PROJECT_DEV}/Commone
 
 #edit block
-TRANSLATIONS    = ts/$${TARGET}_ru.ts \
-                  ts/$${TARGET}_en.ts \
+TRANSLATIONS    = ts/$${TARGET}_en.ts \
+                  ts/$${TARGET}_ru.ts \
                   ts/$${TARGET}_he.ts
 CODECFORSRC     = UTF-8
-HEADERS = src/plu.h
-SOURCES += src/plu.cpp 
-RESOURCES += 
+HEADERS = src/plu.h \
+    ../commone/commonefunctions.h
+SOURCES += src/plu.cpp \ 
+    ../commone/commonefunctions.cpp
+RESOURCES +=  
 RC_FILE += 

@@ -35,6 +35,6 @@ public: //функции
 
 };
 
-Q_DECLARE_INTERFACE(PluCoreInterface, "AZ_Soft.Plugins.PluCoreInterface/3.0")
+Q_DECLARE_INTERFACE(PluCoreInterface, "PG.Soft.Plugins..PluCoreInterface/1.0")
 
 #endif // __PLUCOREINTERFACE_H__

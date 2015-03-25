@@ -1,8 +1,13 @@
 ﻿<RCC>
-  <qresource prefix="splash" >
-    <file>images/splash.png</file>
-  </qresource>
-  <qresource prefix="mainIcon" >
-    <file>images/mainWindow.png</file>
-  </qresource>
+    <qresource prefix="/splash">
+        <file>images/splash.png</file>
+    </qresource>
+    <qresource prefix="/mainIcon">
+        <file>images/mainWindow.png</file>
+    </qresource>
+    <qresource prefix="/">
+        <file>translations/Starter_he.qm</file>
+        <file>translations/Starter_ru.qm</file>
+        <file>translations/Starter_en.qm</file>
+    </qresource>
 </RCC>

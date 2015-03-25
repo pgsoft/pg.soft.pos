@@ -8,13 +8,11 @@
 #define MAINOBJECT_H
 
 #include <QObject>
-#include "AnyPluginInterface.h"
-#include "PluStartupInterface.h"
-#include "PluCoreInterface.h"
 #include <QSplashScreen>
 #include <QPixmap>
-
-
+#include <QProgressBar>
+#include <QDir>
+#include <QSettings>
 class MainObject : public QObject
 {
     Q_OBJECT
@@ -24,23 +22,24 @@ public:
 
 private:
     QPixmap *pixmap;
-    //vars members
+    QProgressBar *progressBar;
+//vars members
     QSplashScreen *onloadApiSplashScreen; //виджет-заставка для отображения процесса запуска ПО
     QSettings *apiSettings; //ссылка на объект параметров приложения
     bool mainObjectState; //состояние главного объекта
-    QList<QObject *> pluList; //список ссылок на все обнаруженные плагины
-    PluCoreInterface *currentPluCore; //ссылка на объект плагина ядра
-    PluStartupInterface * currentPluStartup;//ссылка на объек выбранного стартап плагина
+    QObjectList pluList; //список ссылок на все обнаруженные плагины
     int splashScreenWidth; //ширина виджета заставки
     int splashScreenHeight; //высота виджета заставкик
 
     //functions members
     bool readParameters();
-    bool updateComponents(); //функция, выполняющая обновление компонентов ПО
+    bool updateComponents(bool pShowError=true); //функция, выполняющая обновление компонентов ПО
     bool loadPlugins(bool pShowError=true); //поиска и загрузка плагинов
     bool initModelView(); //инициализация объекта
     void closeAllPlugins();
     void showSplashMessage(const QString &pText=QString());
+    bool createSplash();
+    bool moveComponents(const QString &pStartExchangePath, const QString &pCurrentExchangePath);
 public:
     bool isOk(); //получить общее состояние объекта true=все ок, false = есть проблемы
     bool selectStartupPlugin(); //выбор стартап плагина

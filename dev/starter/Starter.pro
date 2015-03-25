@@ -23,11 +23,11 @@ INCLUDEPATH += ./src \
     $${PROJECT_DEV}/Commone
 
 #edit block
-TRANSLATIONS    = ts/$${TARGET}_ru.ts \
-                  ts/$${TARGET}_en.ts \
+TRANSLATIONS    = ts/$${TARGET}_en.ts \
+                  ts/$${TARGET}_ru.ts \
                   ts/$${TARGET}_he.ts
 CODECFORSRC     = UTF-8
-HEADERS = ../Commone/enums.h \
+HEADERS = \
     src/mainobject.h \
     ../commone/commonefunctions.h
 SOURCES = src/main.cpp \ 
@@ -35,3 +35,5 @@ SOURCES = src/main.cpp \
     ../commone/commonefunctions.cpp
 RESOURCES += rc/$${TARGET}.qrc
 RC_FILE += rc/$${TARGET}.rc
+
+FORMS +=
