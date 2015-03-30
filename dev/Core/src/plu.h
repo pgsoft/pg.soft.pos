@@ -10,8 +10,8 @@
 class Plu : public QObject, public PluCoreInterface, public AnyPluginInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "PG.Soft.Plugins.AnyPluginInterface/1.0")
-    Q_PLUGIN_METADATA(IID "PG.Soft.Plugins.PluCoreInterface/1.0")
+    Q_PLUGIN_METADATA(IID "PG.Soft.POS.Plugins.AnyPluginInterface/1.0")
+    Q_PLUGIN_METADATA(IID "PG.Soft.POS.Plugins.PluCoreInterface/1.0")
     Q_INTERFACES(AnyPluginInterface PluCoreInterface)
 
 public:
@@ -27,8 +27,9 @@ public: //AnyPlugin interface
     QSettings *getParameters(); //получить ссылку на параметры плагина
     //установить путь и краткое название для плагина
     void setFileName(const QString &pFileName = QString());
-    //выполнить целевое действие плагина
-    QVariant launchAction(const QVariant &parameter=QVariant());
+    void setDefaultParameters();
+private:
+    void initModelView();
 
 public: //PluCore interface
     //вставить запись в таблицу БД
@@ -51,5 +52,10 @@ public: //PluCore interface
 
     //выполнение любого скл-запроса
     bool execSQL(QSqlQuery *q, QWidget *w = NULL, const QString &aboutQuery = QString());
+    QString decodeMSRCode(const QString &text);
+    void resizeChildToParent(QWidget *child, QWidget *parent);
+    QString getMSRCode(const QString &comment, QWidget *parent);
+    QDialog *showShadow(QWidget *parent, double pOpacity=-1.0, const QString &pBackgroundcolor=QString());
+    QObjectList getPluginList(int pPluType=-1);
 };
 #endif

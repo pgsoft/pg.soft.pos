@@ -1,0 +1,11 @@
+#ifndef PLUTYPES_H
+#define PLUTYPES_H
+enum PLU_TYPES {
+    PLU_CORE = 0
+    , PLU_USERMODULE = 1
+    , PLU_PAYMENT = 2
+    , PLU_EXCHANGE = 3
+    , PLU_PRINTPRODUCTIONCHECK = 4
+    , PLU_PRINTFISCALCHECK = 5
+};
+#endif // PLUTYPES_H

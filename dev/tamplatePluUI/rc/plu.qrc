@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/Commone">
+        <file>Images/cancel.png</file>
+        <file>Images/ok.png</file>
+    </qresource>
+</RCC>

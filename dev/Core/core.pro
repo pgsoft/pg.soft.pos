@@ -28,8 +28,14 @@ TRANSLATIONS    = ts/$${TARGET}_en.ts \
                   ts/$${TARGET}_he.ts
 CODECFORSRC     = UTF-8
 HEADERS = src/plu.h \
-    ../commone/commonefunctions.h
+    ../commone/commonefunctions.h \
+    src/dialoggetmsrcode.h
 SOURCES += src/plu.cpp \ 
-    ../commone/commonefunctions.cpp
-RESOURCES +=  
+    ../commone/commonefunctions.cpp \
+    src/dialoggetmsrcode.cpp
+RESOURCES += \  
+    rc/plu.qrc
 RC_FILE += 
+
+FORMS += \
+    ui/dialoggetmsrcode.ui

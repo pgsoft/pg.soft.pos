@@ -1,66 +1,23 @@
 #include "plu.h"
 #include <QMessageBox>
 #include "commonefunctions.h"
+#include "dialoggetmsrcode.h"
+#include "enums.h"
 
-Plu::Plu()
-{
-    pluParameters=NULL; // параметры плагина
-    pluUID = "core";
-    setProperty("core", pluUID);
-    if (!addAppTranslator(getUID())){
-        QMessageBox::warning(NULL,
-                             QObject::tr("Error!"),
-                             qApp->property("addAppTranslatorMessage").toString(),
-                             QMessageBox::Ok,0,0);
-        //break; //ошибка - прервать цикл действий
-    }
-}
+//part of Plu class standard implementation
+#include "pluimplementation.h"
+//
 
-Plu::~Plu(){
-
-}
-
-QString Plu::getUID() const {
-    return pluUID;
-}
-
-QString Plu::getFileName() const {
-    return property("pluFileName").toString();
-}
-QString Plu::getName() const {
-    return property("pluName").toString();
-}
-
-QString Plu::getDescription() const {
-    return tr("The Core module.");
-}
-
-QWidget * Plu::getWidget(){
-    return NULL;
-}
-
-QSettings * Plu::getParameters(){
-    return pluParameters;
-}
-//установить путь и краткое название для плагина
-void Plu::setFileName(const QString &pFileName){
-    QString pluLoadPath = qApp->property("pluPath").toString();
-    setProperty("pluFileName", pFileName.trimmed());
-    pluParameters = new QSettings(pluLoadPath+"/"+getFileName()+".ini",QSettings::IniFormat,this);
+void Plu::setDefaultParameters(){
+    QSettings *pluParameters = getParameters();
     if (pluParameters)
     {
+        setProperty("pluParameters", objectToVariant(pluParameters));
         //
-        pluParameters->sync();
-        //далее представлен шаблон добавление в ини-файл параметра
-        QString key;
-        QVariant defaultValue;
-
-        key = "pluName";
-        defaultValue =QVariant(getFileName());
-        if (!pluParameters->contains(key)) pluParameters->setValue(key,defaultValue);
-        pluParameters->sync();
-        setProperty("pluName", pluParameters->value(key));
+        QVariantMap keyValueMap;
+        //keyValueMap.insert("<key>",QVariant(<defaultValue>));
         //
+        updateSettings(keyValueMap, pluParameters, this);
     }
     else
     {
@@ -68,18 +25,27 @@ void Plu::setFileName(const QString &pFileName){
                              ,tr("Attantion!!!")
                              ,tr("Can not receive parameters of module:\n")+getFileName());
     }
+
 }
 
-//выполнить целевое действие плагина
-QVariant Plu::launchAction(const QVariant &parameter){
-    QVariant rv;
-    //
-    if (parameter.isValid()){
-        //to do something
+void Plu::initModelView(){
+    setProperty("pluType", QVariant(PLU_CORE));
+    setProperty("pluUID", "core");
+    setProperty("pluName", getUID());
+    setProperty("pluDescription", tr("Module: ")+getUID());
+    setProperty("pluFileName", QVariant(""));
+    setProperty("pluParameters", QVariant(0));
+    setProperty("pluState", QVariant(0));
+
+    //add plu translation
+    if (!addAppTranslator(getUID())){
+        QMessageBox::warning(NULL,
+                             QObject::tr("Error!"),
+                             qApp->property("addAppTranslatorMessage").toString(),
+                             QMessageBox::Ok,0,0);
+        //break; //ошибка - прервать цикл действий
     }
-    //to do something
-    //
-    return rv;
+    setProperty("pluState", QVariant(1));
 }
 
 //вставить запись в таблицу БД
@@ -135,9 +101,9 @@ int Plu::insertData(const QString &pTableName
 
 //обновить запись в таблице БД
 int Plu::updateData(const QString &pTableName
-                           , const QSqlRecord &pRecord
-                           , const QString &pIDFieldName
-                           , QSqlDatabase * pDB) {
+                    , const QSqlRecord &pRecord
+                    , const QString &pIDFieldName
+                    , QSqlDatabase * pDB) {
     int lRV=-1;
     QVariant recordIDValue;
     if (!pRecord.isEmpty() && !pTableName.isEmpty())
@@ -234,9 +200,79 @@ bool Plu::execSQL(QSqlQuery *pQuery, QWidget *parentWidget, const QString & abou
                              ,tr("Error executing SQL")
                              +"\n"+aboutQuery+"\n\n"
                              +tr("Empty query!")
-                );
+                             );
     }
     return rv;
 }
 
-//Q_EXPORT_PLUGIN2(core,Plu)
+QString Plu::decodeMSRCode(const QString &text){
+    QString code( text.trimmed() );
+    if (!code.isEmpty()){
+        QStringList list = code.split(";");
+        if (list.size()){
+            if (list.size()>1){
+                code = list.at(1);
+            } else {
+                code = list.at(0);
+            }
+        }
+    }
+    return code;
+}
+
+QDialog *Plu::showShadow(QWidget *parent, double pOpacity, const QString &pBackgroundcolor){
+    QDialog *d = new QDialog(parent);
+    Qt::WindowFlags flags =  Qt::Tool | Qt::CustomizeWindowHint | Qt::FramelessWindowHint; ;
+    d->setWindowFlags(flags);
+    d->setWindowOpacity( pOpacity == -1 ? 0.9 : pOpacity );
+    d->setStyleSheet(QString("QDialog{"
+                             "\n	background-color: %1;"
+                             "\n}")
+                     .arg(pBackgroundcolor.isEmpty()? "rgb(0,0,0)" : pBackgroundcolor ));
+    d->show();
+    resizeChildToParent(d, parent);
+    d->activateWindow();
+    return d;
+}
+
+QString Plu::getMSRCode(const QString &comment, QWidget *parent){
+    QString rv;
+    QScopedPointer<QDialog> shadow(showShadow(parent));
+    if (shadow){
+        QScopedPointer<DialogGetMSRCode> d(new DialogGetMSRCode(comment, parent));
+        if (d){
+            d->show();
+            d->activateWindow();
+            if (d->exec()){
+                rv = decodeMSRCode(d->getCode());
+            }
+        }
+    }
+    return rv;
+}
+void Plu::resizeChildToParent(QWidget *child, QWidget *parent){
+    if (!parent || !child) return;
+    int difH=child->frameGeometry().height() - child->rect().height();
+    int difW=child->frameGeometry().width() - child->width();
+    QSize r = parent->size();
+    child->resize(r.width()-difW, r.height() - difH);
+    child->move(parent->mapToGlobal(QPoint(0,0)));
+}
+
+QObjectList Plu::getPluginList(int pPluType){
+    QObjectList rv;
+    QVariant v=qApp->property("pluList");
+    if (v.canConvert<QObjectList>()){
+        QObjectList pluList = v.value<QObjectList>();
+        if (pPluType==-1){
+            rv=pluList;
+        }else{
+            for(int i=0;i<pluList.size();++i){
+                if (pluList.at(i)->property("pluType").toInt()==pPluType){
+                    rv.append(pluList.at(i));
+                }
+            }
+        }
+    }
+    return rv;
+}

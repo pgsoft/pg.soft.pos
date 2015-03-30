@@ -7,9 +7,6 @@
 
 class AnyPluginInterface
 {
-protected:
-    QSettings * pluParameters; // параметры плагина
-    QString pluUID; //внутренний идентификатор плагина
 public:
     virtual ~AnyPluginInterface() {}
     //
@@ -18,15 +15,16 @@ public:
     virtual QString getFileName() const = 0; //получить имя файла плагина без расширения
     virtual QString getName() const = 0; //получить краткое название плагина
     virtual QString getDescription() const = 0; //получить подробное описание плагина
-    virtual QWidget * getWidget() = 0; //получить графическое представление плагина
     virtual QSettings *getParameters() = 0; //получить ссылку на параметры плагина
     //
-    virtual void setFileName(const QString &) = 0; //получить ссылку на параметры плагина
-    //выполнить целевое действие плагина
-    virtual QVariant launchAction(const QVariant &parameter=QVariant()) = 0;
+    virtual void setFileName(const QString &) = 0; //
+    virtual void setDefaultParameters() = 0; //
+private:
+    virtual void initModelView() = 0;
+
 };
 
-Q_DECLARE_INTERFACE(AnyPluginInterface, "PG.Soft.Plugins..AnyPluginInterface/1.0")
+Q_DECLARE_INTERFACE(AnyPluginInterface, "PG.Soft.POS.Plugins.AnyPluginInterface/1.0")
 
 #endif // __ANYPLUGININTERFACE_H__
 

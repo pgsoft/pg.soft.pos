@@ -3,6 +3,7 @@
 
 #include <QSqlDatabase>
 #include <QString>
+#include <QDialog>
 
 class PluCoreInterface
 {
@@ -32,9 +33,14 @@ public: //функции
 
     //получить произвольный скл-запрос
     virtual bool execSQL(QSqlQuery *q, QWidget *w = NULL, const QString &aboutQuery = QString()) =0;
-
+    //
+    virtual QString decodeMSRCode(const QString &text) = 0;
+    virtual void resizeChildToParent(QWidget *child, QWidget *parent) = 0;
+    virtual QString getMSRCode(const QString &comment, QWidget *parent) = 0 ;
+    virtual QDialog *showShadow(QWidget *parent, double pOpacity=-1.0, const QString &pBackgroundcolor=QString()) = 0;
+    virtual QObjectList getPluginList(int pPluType=-1) = 0;
 };
 
-Q_DECLARE_INTERFACE(PluCoreInterface, "PG.Soft.Plugins..PluCoreInterface/1.0")
+Q_DECLARE_INTERFACE(PluCoreInterface, "PG.Soft.POS.Plugins.PluCoreInterface/1.0")
 
 #endif // __PLUCOREINTERFACE_H__

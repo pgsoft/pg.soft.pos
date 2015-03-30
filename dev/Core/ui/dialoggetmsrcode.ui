@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DialogGetMSRCode</class>
+ <widget class="QDialog" name="DialogGetMSRCode">
+  <property name="windowModality">
+   <enum>Qt::WindowModal</enum>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>649</width>
+    <height>165</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Ввод карточки</string>
+  </property>
+  <property name="windowOpacity">
+   <double>1.000000000000000</double>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QDialog#DialogGetMCardCode{
+	background-color: black;
+border: 4px solid grey;
+border-radius: 8px;
+}</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <item row="0" column="0">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>588</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="0" column="1">
+    <widget class="QPushButton" name="pushButton">
+     <property name="minimumSize">
+      <size>
+       <width>40</width>
+       <height>40</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>40</width>
+       <height>40</height>
+      </size>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::ClickFocus</enum>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton{
+	border: 2px solid grey;
+	background-color: rgb(0, 0, 0);
+	border-radius: 20px;
+}
+QPushButton:hover{
+border: 2px solid grey;
+	background-color: rgb(127, 64, 64);
+border-radius: 20px;
+}
+
+QPushButton:pressed:hover{
+border: 2px solid grey;
+	background-color: rgb(127, 127, 127);
+border-radius: 20px;
+}</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../rc/plu.qrc">
+       <normaloff>:/Commone/Images/cancel.png</normaloff>:/Commone/Images/cancel.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>40</width>
+       <height>40</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <widget class="QLabel" name="lComment">
+     <property name="styleSheet">
+      <string notr="true">QLabel{
+	border-top: 1px solid grey;
+	border-left: 1px solid grey;
+	border-right: 1px solid grey;
+	border-bottom: 0px solid grey;
+	border-radius: 0px;
+	border-top-left-radius: 3px;
+	border-top-right-radius: 3px;
+	background-color: rgb(255, 255, 255);
+	padding: 2px;
+	font: 14pt bold;
+}</string>
+     </property>
+     <property name="text">
+      <string>Slide the card through the MSR</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="2">
+    <widget class="QLineEdit" name="leMSRCode">
+     <property name="focusPolicy">
+      <enum>Qt::WheelFocus</enum>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QLineEdit{
+	border-top: 1px solid grey;
+	border-bottom: 1px solid grey;
+	border-left: 1px solid grey;
+	border-right: 1px solid grey;
+	border-top-left-radius: 0px;
+	border-top-right-radius: 0px;
+	border-bottom-left-radius: 3px;
+	border-bottom-right-radius: 3px;
+	background-color: qlineargradient(spread:pad, x1:1, y1:0.7, x2:1, y2:1, stop:0 rgba(255, 255, 255, 255), stop:1 rgba(225, 225, 225, 223));
+	padding: 4px;
+	font: 18pt bold;
+	color: blue;
+}</string>
+     </property>
+     <property name="echoMode">
+      <enum>QLineEdit::Password</enum>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../rc/plu.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>DialogGetMSRCode</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>456</x>
+     <y>108</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>547</x>
+     <y>121</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

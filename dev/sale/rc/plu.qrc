@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Images/cancel.png</file>
+        <file>Images/ok.png</file>
+        <file>Images/widgetPixmap.png</file>
+    </qresource>
+</RCC>

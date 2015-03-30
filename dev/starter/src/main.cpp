@@ -16,22 +16,20 @@ int main(int argc, char ** argv)
         if (mainObject->isOk())
         {
             /**/
-            //mainObject->hideSplash();
+            mainObject->hideSplash();
             //
-            if (mainObject->selectStartupPlugin()){
-                if (mainObject->launchStartupPlugin()){
+            if (mainObject->selectUserModule()){
+                if (mainObject->launchUserModule()){
                     /*связываем событие закрытия последнего окна со слотом завершения
                     * цикла основного обработчика событий приложения
                     */
                     app.connect( &app, SIGNAL( lastWindowClosed() ), &app, SLOT( quit() ) );
                     //запуск цикла основного обработчика событий приложения
                     appReturnValue = app.exec();
-                }else{
-                    textError = QObject::tr("Can not start user module!");
                 }
-            }else{
+            }/*else{
                 textError = QObject::tr("Can not find user module!");
-            }
+            }*/
         }else{
             textError = QObject::tr("Can not to initialize the main object!");
         }

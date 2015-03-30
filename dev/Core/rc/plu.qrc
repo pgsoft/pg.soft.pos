@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/Commone">
+        <file>Images/Blue-Circle-Arrow-Down.png</file>
+        <file>Images/Blue-Circle-Arrow-Up.png</file>
+        <file>Images/cancel.png</file>
+        <file>Images/bgtransparent50.png</file>
+        <file>Images/bgtransparent0.png</file>
+        <file>Images/bgtransparentwhite0.png</file>
+        <file>Images/ok.png</file>
+    </qresource>
+</RCC>

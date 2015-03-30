@@ -5,9 +5,7 @@
     <qresource prefix="/mainIcon">
         <file>images/mainWindow.png</file>
     </qresource>
-    <qresource prefix="/">
-        <file>translations/Starter_he.qm</file>
-        <file>translations/Starter_ru.qm</file>
-        <file>translations/Starter_en.qm</file>
+    <qresource prefix="/DialogSelectUserModule">
+        <file>images/Exit.png</file>
     </qresource>
 </RCC>

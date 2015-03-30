@@ -1,0 +1,6 @@
+﻿<RCC>
+    <qresource prefix="/UserModuleWidget">
+        <file>images/play.png</file>
+        <file>images/questionmark.png</file>
+    </qresource>
+</RCC>

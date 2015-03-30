@@ -29,11 +29,15 @@ TRANSLATIONS    = ts/$${TARGET}_en.ts \
 CODECFORSRC     = UTF-8
 HEADERS = \
     src/mainobject.h \
-    ../commone/commonefunctions.h
+    ../commone/commonefunctions.h \
+    src/dialogselectusermodule.h
 SOURCES = src/main.cpp \ 
     src/mainobject.cpp \
-    ../commone/commonefunctions.cpp
-RESOURCES += rc/$${TARGET}.qrc
+    ../commone/commonefunctions.cpp \
+    src/dialogselectusermodule.cpp
+RESOURCES += rc/$${TARGET}.qrc \
+    rc/DialogSelectUserModule.qrc
 RC_FILE += rc/$${TARGET}.rc
 
-FORMS +=
+FORMS += \
+    ui/dialogselectusermodule.ui

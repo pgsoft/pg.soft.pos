@@ -10,7 +10,6 @@
 #include <QObject>
 #include <QSplashScreen>
 #include <QPixmap>
-#include <QProgressBar>
 #include <QDir>
 #include <QSettings>
 class MainObject : public QObject
@@ -21,15 +20,9 @@ public:
     virtual ~MainObject();
 
 private:
-    QPixmap *pixmap;
-    QProgressBar *progressBar;
 //vars members
     QSplashScreen *onloadApiSplashScreen; //виджет-заставка для отображения процесса запуска ПО
-    QSettings *apiSettings; //ссылка на объект параметров приложения
-    bool mainObjectState; //состояние главного объекта
     QObjectList pluList; //список ссылок на все обнаруженные плагины
-    int splashScreenWidth; //ширина виджета заставки
-    int splashScreenHeight; //высота виджета заставкик
 
     //functions members
     bool readParameters();
@@ -42,8 +35,8 @@ private:
     bool moveComponents(const QString &pStartExchangePath, const QString &pCurrentExchangePath);
 public:
     bool isOk(); //получить общее состояние объекта true=все ок, false = есть проблемы
-    bool selectStartupPlugin(); //выбор стартап плагина
-    bool launchStartupPlugin(); //запуск выбранного стартап плагина
+    bool selectUserModule(bool pShowError=true); //выбор стартап плагина
+    bool launchUserModule(); //запуск выбранного стартап плагина
     void hideSplash();
 signals:
 

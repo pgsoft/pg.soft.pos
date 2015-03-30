@@ -94,3 +94,15 @@ QObject *variantToObject(QVariant pVariant){
     }
     return rv;
 }
+
+void updateSettings(const QVariantMap &pKeyValueMap, QSettings *pSettings, QObject *pObject, bool pForceUpdate){
+    QMap<QString, QVariant>::const_iterator i;
+    for (i = pKeyValueMap.constBegin(); i != pKeyValueMap.constEnd(); ++i){
+        if (pForceUpdate || !pSettings->contains(i.key())) {
+            pSettings->setValue(i.key(),i.value());
+        }
+        if (pObject){
+            pObject->setProperty(i.key().toUtf8(), pSettings->value(i.key()));
+        }
+    }
+}

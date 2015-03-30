@@ -9,18 +9,17 @@
 #include <QProgressBar>
 #include <QDebug>
 #include "AnyPluginInterface.h"
-#include "PluStartupInterface.h"
+#include "PluUserModuleInterface.h"
 #include "PluCoreInterface.h"
+#include "enums.h"
+#include "dialogselectusermodule.h"
 
+#define _PROGRESSBAR qobject_cast<QProgressBar *>(variantToObject(property("progressBar")))
 MainObject::MainObject(QObject *parent) :
     QObject(parent)
 {
-    apiSettings = NULL;
-    pixmap = NULL;
     onloadApiSplashScreen=NULL;
-    splashScreenWidth = 400;
-    splashScreenHeight = 300;
-    mainObjectState=initModelView();
+    setProperty("mainObjectState", QVariant(initModelView()));
 }
 
 MainObject::~MainObject()
@@ -32,23 +31,11 @@ MainObject::~MainObject()
         delete onloadApiSplashScreen;
         onloadApiSplashScreen=NULL;
     }
-    // delete settings object
-    if (apiSettings)
-    {
-        apiSettings->sync();
-        delete apiSettings;
-        apiSettings=NULL;
-    }
-    if(pixmap)
-    {
-        delete pixmap;
-        pixmap = NULL;
-    }
 }
 
 bool MainObject::isOk(){
 
-    return mainObjectState;
+    return property("mainObjectState").toBool();
 }
 void MainObject::showSplashMessage(const QString &pText){
     if(onloadApiSplashScreen){
@@ -60,9 +47,10 @@ void MainObject::showSplashMessage(const QString &pText){
 bool MainObject::createSplash(){
     bool rv=false;
     //create splash widget
-    pixmap = new QPixmap(":/splash/images/splash.png");
+    QPixmap *pixmap = new QPixmap(":/splash/images/splash.png");
     while (pixmap){
-
+        int splashScreenWidth=400; //ширина виджета заставки
+        int splashScreenHeight=300; //высота виджета заставкик
         onloadApiSplashScreen = new QSplashScreen(pixmap->scaled(QSize(splashScreenWidth, splashScreenHeight)));
         if (!onloadApiSplashScreen) break;
         //ручное добавление в заставку нескольких авторских виджетов
@@ -80,7 +68,9 @@ bool MainObject::createSplash(){
         label->move(verOff,splashScreenHeight-30);
         label->show();
         //progress bar
-        progressBar = new QProgressBar(onloadApiSplashScreen);
+        QProgressBar *progressBar = new QProgressBar(onloadApiSplashScreen);
+        if (!progressBar) break;
+        setProperty("progressBar", objectToVariant(progressBar));
         progressBar->setStyleSheet(QLatin1String("QProgressBar {\n"
                                                  "  border: 0px;\n"
                                                  "	background-color: transparent;\n"
@@ -151,24 +141,19 @@ bool MainObject::initModelView(){
 bool MainObject::readParameters(){
     bool rv = false; //значение возврата из функции, пу = false
     //создаем объект управления параметрами приложения
-    apiSettings = new QSettings(qApp->QCoreApplication::applicationFilePath().replace(".exe","")+".ini"
+    QSettings *apiSettings = new QSettings(qApp->QCoreApplication::applicationFilePath().replace(".exe","")+".ini"
                                 ,QSettings::IniFormat
-                                ,qApp);
+                                ,this);
     if (apiSettings){
-        apiSettings->setIniCodec(QTextCodec::codecForName("UTF-8"));
-        apiSettings->sync();
-        //
-        QString key;
-        /*далее показан шаблон, как определить параметры для приложения
-        key="someGroup/someKey";
-        if (!apiSettings->contains(key)) apiSettings->setValue(key,QVariant(someTypeSomeDefaultValue));
-        */
-        key="App/Locale";
-        if (!apiSettings->contains(key)) apiSettings->setValue(key,QVariant("en"));
-        //синхронизация изменений параметров с файлом параметров
-        apiSettings->sync();
-        //
         qApp->setProperty("settings",objectToVariant(apiSettings));
+        apiSettings->setIniCodec(QTextCodec::codecForName("UTF-8"));
+        //
+        QVariantMap keyValueMap;
+        keyValueMap.insert("App/Locale",QVariant("en"));
+        keyValueMap.insert("App/ShowErrorOfTranslation",QVariant(true));
+        //
+        updateSettings(keyValueMap,apiSettings);
+        //
         rv = true;
     }
     return rv;
@@ -211,24 +196,26 @@ bool MainObject::moveComponents(const QString &pStartExchangePath, const QString
         }else{
             //
             newFilename.replace(pStartExchangePath,qApp->applicationDirPath());
-            tmpFilename="";
-            if (QFile::exists(newFilename)){
-                tmpFilename = newFilename+QDateTime::currentDateTime().toString(".yyyyMMdd.hh.mm.ss.RZV");
-                if (!(rv = QFile::rename(newFilename, tmpFilename))){
-                    textError = QObject::tr("Can not rename file:")+newFilename
-                            +QObject::tr("\nto file:")+tmpFilename;
+            if (!newFilename.contains(qApp->applicationFilePath(),Qt::CaseInsensitive)){
+                tmpFilename="";
+                if (QFile::exists(newFilename)){
+                    tmpFilename = newFilename+QDateTime::currentDateTime().toString(".yyyyMMdd.hh.mm.ss.RZV");
+                    if (!(rv = QFile::rename(newFilename, tmpFilename))){
+                        textError = QObject::tr("Can not rename file:")+newFilename
+                                +QObject::tr("\nto file:")+tmpFilename;
+                        break;
+                    }
+                }
+                if (!(rv = QFile::rename(oldFileName, newFilename))){
+                    textError = QObject::tr("Can not rename file:")+oldFileName
+                            +QObject::tr("\nto file:")+newFilename;
                     break;
                 }
-            }
-            if (!(rv = QFile::rename(oldFileName, newFilename))){
-                textError = QObject::tr("Can not rename file:")+oldFileName
-                        +QObject::tr("\nto file:")+newFilename;
-                break;
-            }
-            if (!tmpFilename.isEmpty()){
-                if (!(rv = QFile::remove(tmpFilename))){
-                    textError = QObject::tr("Can not remove tmp file:")+tmpFilename;
-                    break;
+                if (!tmpFilename.isEmpty()){
+                    if (!(rv = QFile::remove(tmpFilename))){
+                        textError = QObject::tr("Can not remove tmp file:")+tmpFilename;
+                        break;
+                    }
                 }
             }
         }
@@ -248,14 +235,14 @@ bool MainObject::updateComponents(bool pShowError){
     if (!rv){
         textError = qApp->property("checkAppPathMessage").toString();
     }else{
-        progressBar->setVisible(true);
+        _PROGRESSBAR->setVisible(true);
         closeAllPlugins();
         path = qApp->applicationDirPath() + "/" + path;
         rv = moveComponents(path, path);
         if (!rv){
             textError = qApp->property("moveComponentsMessage").toString();
         }
-        progressBar->setVisible(false);
+        _PROGRESSBAR->setVisible(false);
     }
     if (!textError.isEmpty()){
         if  (pShowError){
@@ -279,32 +266,30 @@ bool MainObject::loadPlugins(bool pShowError){
         textError = qApp->property("checkAppPathMessage").toString();
     }else{
         closeAllPlugins();
-        QDir pluDir = QDir(qApp->applicationDirPath());
-        pluDir.cd(pluPath);
-        qApp->setProperty("pluPath",pluDir.absolutePath());
-        foreach (QFileInfo pluInfo, pluDir.entryInfoList(QDir::Files))
+        QDir dir = QDir(qApp->applicationDirPath());
+        dir.cd(pluPath);
+        qApp->setProperty("pluPath",dir.absolutePath());
+        foreach (QFileInfo fileInfo, dir.entryInfoList(QDir::Files))
         {
-            QPluginLoader loader(pluInfo.absoluteFilePath(), qApp);
-            if (QObject *plugin = loader.instance())
+            QPluginLoader loader(fileInfo.absoluteFilePath(), qApp);
+            if (QObject *pluginObject = loader.instance())
             {
-                if (AnyPluginInterface *plu = qobject_cast<AnyPluginInterface *>(plugin))
+                showSplashMessage(QString("%1:\n<%2>...")
+                                  .arg(QObject::tr("Loading"))
+                                  .arg(fileInfo.fileName()));
+                pluList.append(pluginObject);
+                if (AnyPluginInterface *anyPlugin = qobject_cast<AnyPluginInterface *>(pluginObject))
                 {
-                    showSplashMessage(QString("%1: <%2>...")
-                                      .arg(QObject::tr("Loading"))
-                                      .arg(pluInfo.fileName()));
-                    plu->setFileName(pluInfo.baseName());
-                    pluList.append(plugin);
-                    showSplashMessage(QString("%1: <%2>...")
-                                      .arg(QObject::tr("Loaded"))
-                                      .arg(plu->getName()));
+                    anyPlugin->setFileName(fileInfo.baseName());
                 }
-                if (!coreFound && qobject_cast<PluCoreInterface *>(plugin)){
-                    qApp->setProperty("pluCore",objectToVariant(plugin));
+                if (!coreFound && pluginObject->property("pluType").toInt()==PLU_CORE){
+                    qApp->setProperty("pluCore",objectToVariant(pluginObject));
                     coreFound=true;
                 }
             }
         }
         //изменим значение возврата и,если не обнаружен плагин ядра, то и выведем сообщение
+
         if (!coreFound){
             rv = false;
             textError=QObject::tr("The Core module not found!");
@@ -325,46 +310,64 @@ bool MainObject::loadPlugins(bool pShowError){
     return rv;
 }
 
-bool MainObject::selectStartupPlugin(){
+bool MainObject::selectUserModule(bool pShowError){
     bool rv=false; //return value by default = true
-    qApp->setProperty("currentPluStartup", QVariant());
-    QObject *currentPluStartup=NULL;
+    qApp->setProperty("userModule", QVariant());
+    QObject *curPluUserModule=NULL;
+    QString textError;
     /*
      * поиск и выбор (если больше одного) стартап плагина из общего списка плагинов
     */
     //поиск
-    QMap<int, QObject *> startupPluginsMap;
+    QMap<int, QObject *> pluginsMap;
     for (int i=0; i<pluList.size(); ++i){
-        if (PluStartupInterface *pluStartup = qobject_cast<PluStartupInterface *>(pluList.at(i))){
-            startupPluginsMap.insert(pluStartup->getSortPosition(), pluList.at(i));
+        if (pluList.at(i)->property("pluType").toInt() == PLU_USERMODULE){
+            pluginsMap.insertMulti(pluList.at(i)->property("pluSortPosition").toInt(), pluList.at(i));
         }
     }
     // startupPluginsMap содержит отсоритованный списко ссылок на стартап плагины
-    if (startupPluginsMap.size()){
-        QObjectList startupPluginsList = startupPluginsMap.values();
-        currentPluStartup = startupPluginsList.at(0);
-        if (startupPluginsList.size()>1){
-            /*to do
-             * делаем ГУИ форму для выбора из нескольких стартап плагинов
-            */
+    if (pluginsMap.size()){
+        QObjectList userModulePluginsList = pluginsMap.values();
+        QScopedPointer<DialogSelectUserModule> d(new DialogSelectUserModule());
+        if (!d.isNull()){
+            for (int i=0; i<userModulePluginsList.size(); ++i){
+                d->addUserModuleWidget(
+                            qobject_cast<QWidget *>(
+                                variantToObject(
+                                    userModulePluginsList.at(i)->property("pluWidget"))));
+            }
+            d->showMaximized();
+            if (d->exec() == QDialog::Accepted){
+                curPluUserModule = d->getSelectedUserModuleObject();
+            }
+        }else{
+            textError=tr("Can not create window for selecting user module!");
         }
     }
-    if (currentPluStartup){
+    if (curPluUserModule){
         rv=true;
-        qApp->setProperty("currentPluStartup", objectToVariant(currentPluStartup));
+        qApp->setProperty("userModule", objectToVariant(curPluUserModule));
+    }
+    if (!textError.isEmpty()){
+        if  (pShowError){
+            QMessageBox::critical(NULL,
+                                  QObject::tr("Error!"),
+                                  textError+QObject::tr("\nNotify your administrator!"),
+                                  QMessageBox::Ok,0,0);
+        }
+        qApp->setProperty("selectUserModuleMessage",QVariant(textError));
     }
     return rv;
 }
 
-bool MainObject::launchStartupPlugin(){
+bool MainObject::launchUserModule(){
     bool rv=false; //значение возврата - по-умолчанию = false
     //если есть выбранный стартап плагин и его состояние true ,т.е. он готов к работе
-    PluStartupInterface *currentPluStartup =
-            qobject_cast<PluStartupInterface *>(variantToObject(qApp->property("currentPluStartup")));
-    if (currentPluStartup){
+    PluUserModuleInterface *curPluUserModule =
+            qobject_cast<PluUserModuleInterface *>(variantToObject(qApp->property("userModule")));
+    if (curPluUserModule){
         //запуск целевой функции выбранного стартап плагина
-        currentPluStartup->slotStart();
-        rv=currentPluStartup->getState(); //возвращаем признак успешности запуска плагина
+        rv = curPluUserModule->show();
     }
     return rv;
 }
